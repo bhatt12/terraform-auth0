@@ -1,0 +1,2 @@
+
+Set-Item -Path env:TF_VAR_user_name -Value “terraform_user“
