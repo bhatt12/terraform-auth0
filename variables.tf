@@ -40,7 +40,6 @@ variable "users" {
   description = "user data"
   type = map(object({
     name     = string
-    username = string
     email    = string
     password = string
   }))
@@ -57,3 +56,12 @@ variable "users" {
     }
   }
 }
+
+variable "secrets"{
+    description = "Action secrets"
+    type = map(string)
+    default = {
+      secret1 = "dummy"
+      secret2 = "dummy"
+    }
+  }

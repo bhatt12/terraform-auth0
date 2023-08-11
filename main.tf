@@ -180,22 +180,22 @@ resource "auth0_action" "action1" {
 #----------------------------------Role-----------------------------------------------------------------
 
 resource "auth0_role" "my_role" {
-  
+
   description = "Role Description..."
-  count = 2
+  count       = 2
   name        = "My Role ${count.index}- (Managed by Terraform)"
 }
 
 resource "auth0_role" "custom_role" {
-  
+
   description = "Role Description..."
-  count = length(var.roles)
-  name        = "${var.roles[count.index]}"
+  count       = length(var.roles)
+  name        = var.roles[count.index]
 }
 
 #-----------------------------------Org------------------------------------------------------------------------
 resource "auth0_organization" "my_organization" {
-  for_each = var.orgs
+  for_each     = var.orgs
   name         = each.value
   display_name = each.value
 
@@ -210,7 +210,7 @@ resource "auth0_organization" "my_organization" {
 
 #-----------------------------------User------------------------------------------------------------------------
 resource "auth0_user" "user" {
-  for_each = var.users
+  for_each        = var.users
   connection_name = "Username-Password-Authentication"
   name            = each.value.name
   email           = each.value.email
@@ -220,3 +220,29 @@ resource "auth0_user" "user" {
 }
 
 #-----------------------------------Action-------------------------------------------------------------------
+resource "auth0_action" "my_action" {
+
+  for_each = local.actions
+  name     = "${each.key}-${timestamp()}"
+  runtime  = local.node_version
+  deploy   = each.value.deploy
+  code     = file("${path.module}/external/actions/${each.key}.js")
+
+  supported_triggers {
+    id      = each.value.trigger
+    version = each.value.version
+  }
+
+  dependencies {
+    name    = "lodash"
+    version = "latest"
+  }
+
+  dynamic "secrets" {
+    for_each = var.secrets
+    content {
+      name  = secrets.key
+      value = secrets.value
+    }
+  }
+}
